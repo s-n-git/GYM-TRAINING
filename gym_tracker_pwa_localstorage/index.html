@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ジムトレーニング記録</title>
+  <link rel="manifest" href="manifest.json">
+  <script>
+    // データの読み込み
+    function loadData() {
+      const saved = JSON.parse(localStorage.getItem('gymData') || '{}');
+      document.getElementById('date').value = saved.date || '';
+      document.getElementById('workout').value = saved.workout || '';
+      document.getElementById('memo').value = saved.memo || '';
+    }
+
+    // データの保存
+    function saveData() {
+      const data = {
+        date: document.getElementById('date').value,
+        workout: document.getElementById('workout').value,
+        memo: document.getElementById('memo').value
+      };
+      localStorage.setItem('gymData', JSON.stringify(data));
+      alert('保存しました');
+    }
+
+    // データのクリア
+    function clearData() {
+      localStorage.removeItem('gymData');
+      loadData(); // 再読み込み
+      alert('記録をリセットしました');
+    }
+
+    window.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</head>
+<body>
+  <h1>ジムトレーニング記録</h1>
+  <label>日付：<input type="date" id="date"></label><br><br>
+  <label>トレーニング内容：<input type="text" id="workout"></label><br><br>
+  <label>メモ：</label><br>
+  <textarea id="memo" rows="6" cols="40" placeholder="感想やメモなど自由に記入"></textarea><br><br>
+  <button onclick="saveData()">保存</button>
+  <button onclick="clearData()">リセット</button>
+</body>
+</html>
