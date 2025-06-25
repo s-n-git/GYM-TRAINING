@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ジムトレーニング記録</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.1) 10px,
+                rgba(255,255,255,0.1) 20px
+            );
+            animation: shimmer 20s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .input-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        select, input[type="number"], input[type="date"], input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        select:focus, input[type="number"]:focus, input[type="date"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .exercise-input-container {
+            position: relative;
+        }
+        
+        .exercise-toggle {
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .toggle-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .custom-exercise-input {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .custom-exercise-input.active {
+            display: block;
+        }
+        
+        .preset-exercise-select.hidden {
+            display: none;
+        }
+        
+        .weight-reps-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .records-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .records-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+        
+        .record-item {
+            background: linear-gradient(135deg, #f8f9ff, #e8ecff);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .record-item.editing {
+            border-left-color: #ff6b6b;
+            background: linear-gradient(135deg, #fff8f8, #ffe8e8);
+        }
+        
+        .record-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.1) 50%, transparent 52%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .record-item:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .record-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .exercise-name {
+            font-weight: 700;
+            font-size: 1.3em;
+            color: #333;
+        }
+        
+        .record-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .record-details {
+            color: #555;
+            font-size: 1.1em;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+        
+        .edit-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+        
+        .add-set-btn {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+        
+        .save-btn {
+            background: linear-gradient(45deg, #5f27cd, #00d2d3);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+        
+        .cancel-btn {
+            background: linear-gradient(45deg, #a4b0be, #747d8c);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+        
+        .delete-btn:hover, .edit-btn:hover, .add-set-btn:hover, .save-btn:hover, .cancel-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .set-item {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .set-details {
+            font-size: 1em;
+            color: #555;
+        }
+        
+        .edit-form {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 2px solid #667eea;
+        }
+        
+        .edit-form select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .edit-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 40px;
+            font-size: 1.1em;
+        }
+        
+        /* カスタム確認ダイアログのスタイル */
+        .confirm-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dialog-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .dialog-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: dialogSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes dialogSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .dialog-content h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .dialog-content p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .btn-confirm {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(45deg, #a4b0be, #747d8c);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(116, 125, 140, 0.4);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .weight-reps-container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .record-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💪 ジムトレーニング記録</h1>
+            <p>トレーニングを記録して進歩を追跡しよう</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="exercise">トレーニング種目</label>
+                    <div class="exercise-input-container">
+                        <select id="exercise" class="preset-exercise-select">
+                            <option value="">種目を選択</option>
+                            <optgroup label="胸">
+                                <option value="ベンチプレス">ベンチプレス</option>
+                                <option value="インクラインベンチプレス">インクラインベンチプレス</option>
+                                <option value="ダンベルフライ">ダンベルフライ</option>
+                                <option value="チェストプレス">チェストプレス</option>
+                                <option value="ダンベルベンチプレス">ダンベルベンチプレス</option>
+                                <option value="ディップス">ディップス</option>
+                            </optgroup>
+                            <optgroup label="背中">
+                                <option value="デッドリフト">デッドリフト</option>
+                                <option value="ラットプルダウン">ラットプルダウン</option>
+                                <option value="ローイング">ローイング</option>
+                                <option value="プルアップ">プルアップ</option>
+                                <option value="チンアップ">チンアップ</option>
+                                <option value="シュラッグ">シュラッグ</option>
+                            </optgroup>
+                            <optgroup label="脚">
+                                <option value="スクワット">スクワット</option>
+                                <option value="レッグプレス">レッグプレス</option>
+                                <option value="レッグカール">レッグカール</option>
+                                <option value="レッグエクステンション">レッグエクステンション</option>
+                                <option value="カーフレイズ">カーフレイズ</option>
+                                <option value="ランジ">ランジ</option>
+                            </optgroup>
+                            <optgroup label="肩">
+                                <option value="ショルダープレス">ショルダープレス</option>
+                                <option value="サイドレイズ">サイドレイズ</option>
+                                <option value="リアレイズ">リアレイズ</option>
+                                <option value="フロントレイズ">フロントレイズ</option>
+                                <option value="アップライトロウ">アップライトロウ</option>
+                            </optgroup>
+                            <optgroup label="腕">
+                                <option value="バイセップカール">バイセップカール</option>
+                                <option value="トライセップエクステンション">トライセップエクステンション</option>
+                                <option value="ハンマーカール">ハンマーカール</option>
+                                <option value="トライセップディップス">トライセップディップス</option>
+                                <option value="クローズグリップベンチプレス">クローズグリップベンチプレス</option>
+                            </optgroup>
+                            <optgroup label="腹筋・体幹">
+                                <option value="プランク">プランク</option>
+                                <option value="クランチ">クランチ</option>
+                                <option value="レッグレイズ">レッグレイズ</option>
+                                <option value="ロシアンツイスト">ロシアンツイスト</option>
+                                <option value="マウンテンクライマー">マウンテンクライマー</option>
+                            </optgroup>
+                        </select>
+                        
+                        <input type="text" id="customExercise" class="custom-exercise-input" placeholder="カスタム種目を入力...">
+                        
+                        <div class="exercise-toggle">
+                            <button type="button" class="toggle-btn" onclick="toggleExerciseInput()">
+                                <span id="toggleText">カスタム種目を入力</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="date">トレーニング日</label>
+                    <input type="date" id="date">
+                </div>
+                
+                <div class="weight-reps-container">
+                    <div class="input-group">
+                        <label for="weight">重量 (kg)</label>
+                        <select id="weight">
+                            <option value="">重量を選択</option>
+                            <optgroup label="軽量 (2.5kg刻み)">
+                                <option value="2.5">2.5kg</option>
+                                <option value="5">5kg</option>
+                                <option value="7.5">7.5kg</option>
+                                <option value="10">10kg</option>
+                                <option value="12.5">12.5kg</option>
+                                <option value="15">15kg</option>
+                                <option value="17.5">17.5kg</option>
+                                <option value="20">20kg</option>
+                            </optgroup>
+                            <optgroup label="中量 (5kg刻み)">
+                                <option value="25">25kg</option>
+                                <option value="30">30kg</option>
+                                <option value="35">35kg</option>
+                                <option value="40">40kg</option>
+                                <option value="45">45kg</option>
+                                <option value="50">50kg</option>
+                                <option value="55">55kg</option>
+                                <option value="60">60kg</option>
+                                <option value="65">65kg</option>
+                                <option value="70">70kg</option>
+                                <option value="75">75kg</option>
+                                <option value="80">80kg</option>
+                                <option value="85">85kg</option>
+                                <option value="90">90kg</option>
+                                <option value="95">95kg</option>
+                                <option value="100">100kg</option>
+                            </optgroup>
+                            <optgroup label="重量 (10kg刻み)">
+                                <option value="110">110kg</option>
+                                <option value="120">120kg</option>
+                                <option value="130">130kg</option>
+                                <option value="140">140kg</option>
+                                <option value="150">150kg</option>
+                                <option value="160">160kg</option>
+                                <option value="170">170kg</option>
+                                <option value="180">180kg</option>
+                                <option value="190">190kg</option>
+                                <option value="200">200kg</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="reps">回数</label>
+                        <select id="reps">
+                            <option value="">回数を選択</option>
+                            <optgroup label="基本 (1回刻み)">
+                                <option value="1">1回</option>
+                                <option value="2">2回</option>
+                                <option value="3">3回</option>
+                                <option value="4">4回</option>
+                                <option value="5">5回</option>
+                                <option value="6">6回</option>
+                                <option value="7">7回</option>
+                                <option value="8">8回</option>
+                                <option value="9">9回</option>
+                                <option value="10">10回</option>
+                                <option value="11">11回</option>
+                                <option value="12">12回</option>
+                                <option value="13">13回</option>
+                                <option value="14">14回</option>
+                                <option value="15">15回</option>
+                                <option value="16">16回</option>
+                                <option value="17">17回</option>
+                                <option value="18">18回</option>
+                                <option value="19">19回</option>
+                                <option value="20">20回</option>
+                            </optgroup>
+                            <optgroup label="中量 (5回刻み)">
+                                <option value="25">25回</option>
+                                <option value="30">30回</option>
+                                <option value="35">35回</option>
+                                <option value="40">40回</option>
+                                <option value="45">45回</option>
+                                <option value="50">50回</option>
+                                <option value="55">55回</option>
+                                <option value="60">60回</option>
+                                <option value="65">65回</option>
+                                <option value="70">70回</option>
+                                <option value="75">75回</option>
+                                <option value="80">80回</option>
+                                <option value="85">85回</option>
+                                <option value="90">90回</option>
+                                <option value="95">95回</option>
+                                <option value="100">100回</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="addRecord()">記録を追加</button>
+            </div>
+            
+            <div class="records-section">
+                <h2>📊 トレーニング記録</h2>
+                <div id="records-list">
+                    <div class="empty-state">
+                        まだ記録がありません。<br>
+                        最初のトレーニングを記録してみましょう！
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- カスタム確認ダイアログ -->
+    <div id="confirmDialog" class="confirm-dialog" style="display: none;">
+        <div class="dialog-overlay"></div>
+        <div class="dialog-content">
+            <h3>確認</h3>
+            <p id="confirmMessage"></p>
+            <div class="dialog-buttons">
+                <button id="confirmYes" class="btn-confirm">はい、削除する</button>
+                <button id="confirmNo" class="btn-cancel">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let records = [];
+        let recordId = 0;
+        let editingId = null;
+        let isCustomMode = false;
+        let pendingDeleteCallback = null;
+
+        // カスタム確認ダイアログ
+        function showConfirmDialog(message, onConfirm, onCancel) {
+            const dialog = document.getElementById('confirmDialog');
+            const messageElement = document.getElementById('confirmMessage');
+            const yesButton = document.getElementById('confirmYes');
+            const noButton = document.getElementById('confirmNo');
+            
+            messageElement.textContent = message;
+            dialog.style.display = 'flex';
+            
+            // 前のイベントリスナーを削除
+            yesButton.replaceWith(yesButton.cloneNode(true));
+            noButton.replaceWith(noButton.cloneNode(true));
+            
+            // 新しいボタン要素を取得
+            const newYesButton = document.getElementById('confirmYes');
+            const newNoButton = document.getElementById('confirmNo');
+            
+            // イベントリスナーを追加
+            newYesButton.addEventListener('click', function() {
+                dialog.style.display = 'none';
+                if (onConfirm) onConfirm();
+            });
+            
+            newNoButton.addEventListener('click', function() {
+                dialog.style.display = 'none';
+                if (onCancel) onCancel();
+            });
+            
+            // オーバーレイクリックで閉じる
+            const overlay = dialog.querySelector('.dialog-overlay');
+            overlay.addEventListener('click', function() {
+                dialog.style.display = 'none';
+                if (onCancel) onCancel();
+            });
+        }
+
+        function toggleExerciseInput() {
+            const presetSelect = document.getElementById('exercise');
+            const customInput = document.getElementById('customExercise');
+            const toggleText = document.getElementById('toggleText');
+            
+            isCustomMode = !isCustomMode;
+            
+            if (isCustomMode) {
+                presetSelect.classList.add('hidden');
+                customInput.classList.add('active');
+                toggleText.textContent = 'プリセットから選択';
+                customInput.focus();
+            } else {
+                presetSelect.classList.remove('hidden');
+                customInput.classList.remove('active');
+                toggleText.textContent = 'カスタム種目を入力';
+                customInput.value = '';
+                presetSelect.focus();
+            }
+        }
+
+        function getSelectedExercise() {
+            if (isCustomMode) {
+                return document.getElementById('customExercise').value.trim();
+            } else {
+                return document.getElementById('exercise').value;
+            }
+        }
+
+        function addRecord() {
+            const exercise = getSelectedExercise();
+            const weight = document.getElementById('weight').value;
+            const reps = document.getElementById('reps').value;
+            const date = document.getElementById('date').value;
+
+            if (!exercise || !weight || !reps || !date) {
+                alert('すべての項目を入力してください');
+                return;
+            }
+
+            // 同じ日の同じ種目があるかチェック
+            const existingRecord = records.find(r => 
+                r.exercise === exercise && 
+                new Date(r.date).toDateString() === new Date(date).toDateString()
+            );
+
+            if (existingRecord) {
+                // セット追加
+                existingRecord.sets.push({
+                    weight: parseFloat(weight),
+                    reps: parseInt(reps)
+                });
+                console.log('Added set to existing record. Record ID:', existingRecord.id, 'Total sets:', existingRecord.sets.length);
+            } else {
+                // 新規記録作成
+                const record = {
+                    id: recordId++,
+                    exercise: exercise,
+                    date: new Date(date),
+                    timestamp: new Date(),
+                    sets: [{
+                        weight: parseFloat(weight),
+                        reps: parseInt(reps)
+                    }]
+                };
+                records.unshift(record);
+                console.log('Created new record with ID:', record.id);
+            }
+
+            console.log('Current records count after add:', records.length);
+            console.log('All records:', records.map(r => ({id: r.id, exercise: r.exercise, sets: r.sets.length})));
+            
+            updateRecordsList();
+            clearInputs();
+        }
+
+        function editRecord(id) {
+            editingId = id;
+            updateRecordsList();
+        }
+
+        function saveRecord(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+
+            console.log('Saving record with id:', id);
+            console.log('Record has', record.sets.length, 'sets');
+
+            // 各セットの編集内容を保存
+            let hasValidData = true;
+            record.sets.forEach((set, index) => {
+                const weightSelect = document.getElementById(`edit-weight-${id}-${index}`);
+                const repsSelect = document.getElementById(`edit-reps-${id}-${index}`);
+                
+                if (weightSelect && repsSelect) {
+                    const weightValue = weightSelect.value;
+                    const repsValue = repsSelect.value;
+                    
+                    if (weightValue && repsValue) {
+                        set.weight = parseFloat(weightValue);
+                        set.reps = parseInt(repsValue);
+                        console.log(`Set ${index + 1}: ${set.weight}kg × ${set.reps}回`);
+                    } else {
+                        console.warn(`Set ${index + 1} has missing values:`, {weight: weightValue, reps: repsValue});
+                        hasValidData = false;
+                    }
+                } else {
+                    console.warn(`Could not find input elements for set ${index + 1}`);
+                    hasValidData = false;
+                }
+            });
+
+            if (!hasValidData) {
+                alert('すべてのセットで重量と回数を選択してください');
+                return;
+            }
+
+            editingId = null;
+            updateRecordsList();
+            console.log('Record saved successfully');
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            updateRecordsList();
+        }
+
+        function saveCurrentEditingValues(recordId) {
+            const record = records.find(r => r.id === recordId);
+            if (!record) return;
+
+            // 各セットの現在の入力値を保存
+            record.sets.forEach((set, index) => {
+                const weightSelect = document.getElementById(`edit-weight-${recordId}-${index}`);
+                const repsSelect = document.getElementById(`edit-reps-${recordId}-${index}`);
+                
+                if (weightSelect && weightSelect.value) {
+                    set.weight = parseFloat(weightSelect.value);
+                }
+                if (repsSelect && repsSelect.value) {
+                    set.reps = parseInt(repsSelect.value);
+                }
+            });
+            
+            console.log('Saved current editing values for record:', recordId);
+        }
+
+        function addSetToRecord(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+
+            console.log('Adding set to record. Current sets:', record.sets.length);
+            
+            // 編集中の場合、現在の入力値を先に保存
+            if (editingId === id) {
+                console.log('Saving current editing values before adding new set');
+                saveCurrentEditingValues(id);
+            }
+
+            // 新しいセットを追加（デフォルト値を設定）
+            const lastSet = record.sets[record.sets.length - 1];
+            const newSet = {
+                weight: lastSet ? lastSet.weight : 20,  // 前回の重量またはデフォルト値
+                reps: lastSet ? lastSet.reps : 10       // 前回の回数またはデフォルト値
+            };
+            
+            record.sets.push(newSet);
+            console.log('Added new set with default values:', newSet);
+            console.log('Total sets after addition:', record.sets.length);
+
+            updateRecordsList();
+        }
+
+        function deleteSet(recordId, setIndex) {
+            console.log('deleteSet called with recordId:', recordId, 'setIndex:', setIndex);
+            
+            // IDを数値として処理
+            const numericId = parseInt(recordId);
+            const numericIndex = parseInt(setIndex);
+            
+            console.log('Numeric ID:', numericId, 'Numeric Index:', numericIndex);
+            
+            const record = records.find(r => r.id === numericId);
+            if (!record) {
+                console.log('Record not found for id:', numericId);
+                console.log('Available records:', records.map(r => ({id: r.id, exercise: r.exercise})));
+                return;
+            }
+
+            console.log('Found record:', record);
+            console.log('Record has', record.sets.length, 'sets');
+
+            if (record.sets.length === 1) {
+                // 最後のセットの場合は記録全体を削除
+                console.log('Deleting entire record as it has only one set');
+                deleteRecord(numericId);
+            } else {
+                // セットのみ削除
+                console.log('Deleting set at index:', numericIndex);
+                
+                const setToDelete = record.sets[numericIndex];
+                const confirmMessage = `セット ${numericIndex + 1} (${setToDelete.weight}kg × ${setToDelete.reps}回) を削除しますか？`;
+                
+                showConfirmDialog(
+                    confirmMessage,
+                    function() {
+                        // 削除前に現在の編集値を保存
+                        if (editingId === numericId) {
+                            saveCurrentEditingValues(numericId);
+                        }
+                        
+                        if (numericIndex >= 0 && numericIndex < record.sets.length) {
+                            record.sets.splice(numericIndex, 1);
+                            console.log('Set deleted. Remaining sets:', record.sets.length);
+                            updateRecordsList();
+                        } else {
+                            console.log('Invalid set index:', numericIndex);
+                        }
+                    },
+                    function() {
+                        console.log('User cancelled set deletion');
+                    }
+                );
+            }
+        }
+
+        function deleteRecord(id) {
+            console.log('deleteRecord called with id:', id);
+            
+            // IDが数値として正しく処理されているか確認
+            const numericId = parseInt(id);
+            const recordToDelete = records.find(record => record.id === numericId);
+            
+            if (!recordToDelete) {
+                console.log('Record not found for id:', numericId);
+                return;
+            }
+            
+            console.log('Found record to delete:', recordToDelete.exercise);
+            
+            // カスタム確認ダイアログを使用
+            const confirmMessage = `「${recordToDelete.exercise}」の記録を削除しますか？\n\nこの操作は取り消せません`;
+            
+            showConfirmDialog(
+                confirmMessage,
+                function() {
+                    // 削除実行
+                    console.log('User confirmed deletion via custom dialog');
+                    console.log('Records before deletion:', records.length);
+                    
+                    const originalLength = records.length;
+                    records = records.filter(record => record.id !== numericId);
+                    
+                    console.log('Records after deletion:', records.length);
+                    console.log('Deletion successful:', originalLength !== records.length);
+                    
+                    if (originalLength === records.length) {
+                        console.error('Deletion failed - record still exists');
+                        alert('削除に失敗しました。再度お試しください。');
+                        return;
+                    }
+                    
+                    updateRecordsList();
+                    console.log('Record deleted successfully');
+                },
+                function() {
+                    // キャンセル
+                    console.log('User cancelled deletion via custom dialog');
+                }
+            );
+        }
+
+        function updateRecordsList() {
+            const recordsList = document.getElementById('records-list');
+            
+            if (records.length === 0) {
+                recordsList.innerHTML = `
+                    <div class="empty-state">
+                        まだ記録がありません。<br>
+                        最初のトレーニングを記録してみましょう！
+                    </div>
+                `;
+                return;
+            }
+
+            const recordsHtml = records.map(record => {
+                const isEditing = editingId === record.id;
+                const setsHtml = record.sets.map((set, setIndex) => {
+                    if (isEditing) {
+                        return `
+                            <div class="set-item">
+                                <div class="edit-form-row">
+                                    <select id="edit-weight-${record.id}-${setIndex}">
+                                        ${generateWeightOptions(set.weight)}
+                                    </select>
+                                    <select id="edit-reps-${record.id}-${setIndex}">
+                                        ${generateRepsOptions(set.reps)}
+                                    </select>
+                                </div>
+                                <button class="delete-btn" type="button" onclick="event.stopPropagation(); deleteSet(${record.id}, ${setIndex}); return false;">削除</button>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="set-item">
+                                <div class="set-details">
+                                    重量: <strong>${set.weight}kg</strong> × 回数: <strong>${set.reps}回</strong>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+
+                return `
+                    <div class="record-item ${isEditing ? 'editing' : ''}" data-record-id="${record.id}">
+                        <div class="record-header">
+                            <span class="exercise-name">${record.exercise}</span>
+                            <div>
+                                <span class="record-time">${formatDate(record.date)}</span>
+                                ${isEditing ? `
+                                    <button class="save-btn" type="button" onclick="saveRecord(${record.id}); return false;">保存</button>
+                                    <button class="cancel-btn" type="button" onclick="cancelEdit(); return false;">キャンセル</button>
+                                ` : `
+                                    <button class="edit-btn" type="button" onclick="editRecord(${record.id}); return false;">編集</button>
+                                    <button class="add-set-btn" type="button" onclick="addSetToRecord(${record.id}); return false;">セット追加</button>
+                                    <button class="delete-btn" type="button" onclick="event.stopPropagation(); deleteRecord(${record.id}); return false;">削除</button>
+                                `}
+                            </div>
+                        </div>
+                        <div class="record-details">
+                            ${setsHtml}
+                            ${isEditing ? `
+                                <button class="add-set-btn" type="button" onclick="addSetToRecord(${record.id}); return false;" style="margin-top: 10px;">+ セット追加</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            recordsList.innerHTML = recordsHtml;
+            console.log('Records list updated. Current records count:', records.length); // デバッグ用
+        }
+
+        function generateWeightOptions(selectedWeight) {
+            let options = '<option value="">重量を選択</option>';
+            
+            // 軽量 (2.5kg刻み)
+            options += '<optgroup label="軽量 (2.5kg刻み)">';
+            for (let weight = 2.5; weight <= 20; weight += 2.5) {
+                const selected = weight === selectedWeight ? 'selected' : '';
+                options += `<option value="${weight}" ${selected}>${weight}kg</option>`;
+            }
+            options += '</optgroup>';
+            
+            // 中量 (5kg刻み)
+            options += '<optgroup label="中量 (5kg刻み)">';
+            for (let weight = 25; weight <= 100; weight += 5) {
+                const selected = weight === selectedWeight ? 'selected' : '';
+                options += `<option value="${weight}" ${selected}>${weight}kg</option>`;
+            }
+            options += '</optgroup>';
+            
+            // 重量 (10kg刻み)
+            options += '<optgroup label="重量 (10kg刻み)">';
+            for (let weight = 110; weight <= 200; weight += 10) {
+                const selected = weight === selectedWeight ? 'selected' : '';
+                options += `<option value="${weight}" ${selected}>${weight}kg</option>`;
+            }
+            options += '</optgroup>';
+            
+            return options;
+        }
+
+        function generateRepsOptions(selectedReps) {
+            let options = '<option value="">回数を選択</option>';
+            
+            // 基本 (1回刻み)
+            options += '<optgroup label="基本 (1回刻み)">';
+            for (let reps = 1; reps <= 20; reps++) {
+                const selected = reps === selectedReps ? 'selected' : '';
+                options += `<option value="${reps}" ${selected}>${reps}回</option>`;
+            }
+            options += '</optgroup>';
+            
+            // 中量 (5回刻み)
+            options += '<optgroup label="中量 (5回刻み)">';
+            for (let reps = 25; reps <= 100; reps += 5) {
+                const selected = reps === selectedReps ? 'selected' : '';
+                options += `<option value="${reps}" ${selected}>${reps}回</option>`;
+            }
+            options += '</optgroup>';
+            
+            return options;
+        }
+
+        function formatDate(date) {
+            const recordDate = new Date(date);
+            
+            // 年/月/日の形式で表示
+            return recordDate.toLocaleDateString('ja-JP', {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric'
+            });
+        }
+
+        function clearInputs() {
+            if (isCustomMode) {
+                document.getElementById('customExercise').value = '';
+            } else {
+                document.getElementById('exercise').value = '';
+            }
+            document.getElementById('weight').value = '';
+            document.getElementById('reps').value = '';
+            document.getElementById('date').value = '';
+            
+            // 日付を今日にリセット
+            initializeDate();
+        }
+
+        // 初期化時に今日の日付を設定
+        function initializeDate() {
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            document.getElementById('date').value = dateString;
+        }
+
+        // キーボードショートカット
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                addRecord();
+            }
+            // Escキーで編集をキャンセル
+            if (e.key === 'Escape' && editingId !== null) {
+                cancelEdit();
+            }
+        });
+
+        // 初期表示
+        initializeDate();
+        updateRecordsList();
+    </script>
+</body>
+</html>
